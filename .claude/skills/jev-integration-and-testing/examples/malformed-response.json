@@ -1,0 +1,49 @@
+{
+  "_comment": "Exercises the degradation ladder in jev-game-backend/references/error-handling.md. Each key is a separate case the client must survive; tests load one at a time.",
+  "cases": {
+    "illegalMove": {
+      "id": "gen-dec-SYNTHETIC0002",
+      "answers": {
+        "move": {
+          "type": "choice",
+          "choice": "RIGHT",
+          "probabilities": { "RIGHT": 1.0 },
+          "confidence": 0.9
+        }
+      },
+      "_expect": "rung 6 -- RIGHT is a wall at this junction; fall back to stub"
+    },
+    "missingMoveKey": {
+      "id": "gen-dec-SYNTHETIC0003",
+      "answers": {
+        "aggression": { "type": "score", "score": 2.0, "probabilities": {}, "confidence": 0.5 }
+      },
+      "_expect": "rung 5 -- no move answer; fall back to stub"
+    },
+    "probabilitiesDoNotSum": {
+      "id": "gen-dec-SYNTHETIC0004",
+      "answers": {
+        "move": {
+          "type": "choice",
+          "choice": "UP",
+          "probabilities": { "UP": 0.4, "LEFT": 0.2 },
+          "confidence": 0.5
+        }
+      },
+      "_expect": "rung 7 -- keep move UP, null the distribution, source stays jev"
+    },
+    "scoreOutOfRange": {
+      "id": "gen-dec-SYNTHETIC0005",
+      "answers": {
+        "move": {
+          "type": "choice",
+          "choice": "UP",
+          "probabilities": { "UP": 0.7, "LEFT": 0.3 },
+          "confidence": 0.6
+        },
+        "aggression": { "type": "score", "score": 7.9, "probabilities": {}, "confidence": 0.5 }
+      },
+      "_expect": "rung 8 -- clamp aggression to 4.0"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "model": "~typesafe/jev-latest",
+  "state": {
+    "position": { "x": 12, "y": 14 },
+    "heading": "LEFT",
+    "livesRemaining": 3,
+    "pelletsRemaining": 173,
+    "powerTicksRemaining": 0,
+    "options": {
+      "LEFT": {
+        "pelletDistance": 3,
+        "pelletsWithin8": 11,
+        "deadEnd": false,
+        "nearestGhost": { "name": "blinky", "distance": 3, "mode": "chase", "closing": true }
+      },
+      "UP": {
+        "pelletDistance": 1,
+        "pelletsWithin8": 6,
+        "deadEnd": false,
+        "nearestGhost": { "name": "pinky", "distance": 9, "mode": "scatter", "closing": false }
+      },
+      "DOWN": {
+        "pelletDistance": 2,
+        "pelletsWithin8": 4,
+        "deadEnd": true,
+        "nearestGhost": { "name": "clyde", "distance": 12, "mode": "scatter", "closing": false }
+      }
+    },
+    "ghosts": [
+      { "name": "blinky", "distance": 3, "mode": "chase", "bearing": "RIGHT" },
+      { "name": "pinky", "distance": 9, "mode": "scatter", "bearing": "UP" },
+      { "name": "inky", "distance": 14, "mode": "house", "bearing": "UP" },
+      { "name": "clyde", "distance": 12, "mode": "scatter", "bearing": "DOWN" }
+    ]
+  },
+  "questions": {
+    "move": {
+      "type": "choice",
+      "instructions": "Pac-Runner is at a junction and must commit to one direction. Choose the direction that best balances eating pellets against avoiding ghosts, given the state.",
+      "criteria": {
+        "LEFT": "Move left. Nearest pellet 3 tiles; 11 pellets within 8 tiles; nearest ghost blinky (chase) 3 tiles and closing; not a dead end.",
+        "UP": "Move up. Nearest pellet 1 tile; 6 pellets within 8 tiles; nearest ghost pinky (scatter) 9 tiles, not closing; not a dead end.",
+        "DOWN": "Move down. Nearest pellet 2 tiles; 4 pellets within 8 tiles; nearest ghost clyde (scatter) 12 tiles, not closing; dead end -- no exit other than back through here.",
+        "STAY": "Hold the current heading and re-evaluate next tile."
+      }
+    },
+    "aggression": {
+      "type": "score",
+      "instructions": "How much risk should Pac-Runner accept right now to collect pellets, given ghost positions and power-pellet state?",
+      "criteria": [
+        "Flee: ghosts are close and closing; give up pellets to survive.",
+        "Cautious: keep distance, take only safe pellets.",
+        "Neutral: normal pellet collection, no immediate threat.",
+        "Hunting: powered up or ghosts are distant; push into dense pellets.",
+        "Reckless: powered up with ghosts nearby; actively chase them down."
+      ]
+    }
+  }
+}

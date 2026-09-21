@@ -1,0 +1,42 @@
+{
+  "id": "gen-dec-SYNTHETIC0001",
+  "model": "~typesafe/jev-latest",
+  "provider": "TypeSafe",
+  "answers": {
+    "move": {
+      "type": "choice",
+      "choice": "UP",
+      "probabilities": {
+        "UP": 0.62,
+        "LEFT": 0.29,
+        "DOWN": 0.07,
+        "STAY": 0.02
+      },
+      "confidence": 0.71
+    },
+    "aggression": {
+      "type": "score",
+      "score": 1.38,
+      "legend": {
+        "0": "Flee: ghosts are close and closing; give up pellets to survive.",
+        "1": "Cautious: keep distance, take only safe pellets.",
+        "2": "Neutral: normal pellet collection, no immediate threat.",
+        "3": "Hunting: powered up or ghosts are distant; push into dense pellets.",
+        "4": "Reckless: powered up with ghosts nearby; actively chase them down."
+      },
+      "probabilities": {
+        "0": 0.08,
+        "1": 0.52,
+        "2": 0.34,
+        "3": 0.06,
+        "4": 0.0
+      },
+      "confidence": 0.64
+    }
+  },
+  "usage": {
+    "input_tokens": 318,
+    "output_tokens": 0,
+    "cost": 0.0000133
+  }
+}
