@@ -1,22 +1,22 @@
 {
-  "id": "gen-dec-SYNTHETIC0001",
-  "model": "~typesafe/jev-latest",
+  "id": "gen-dec-1790055245-T5IgzHFlKpiPCTCdATIT",
+  "model": "typesafe/jev-1.13-20260917",
   "provider": "TypeSafe",
   "answers": {
     "move": {
       "type": "choice",
       "choice": "UP",
       "probabilities": {
-        "UP": 0.62,
-        "LEFT": 0.29,
-        "DOWN": 0.07,
-        "STAY": 0.02
+        "DOWN": 0,
+        "STAY": 0,
+        "UP": 0.99,
+        "LEFT": 0.01
       },
-      "confidence": 0.71
+      "confidence": 0.98
     },
     "aggression": {
       "type": "score",
-      "score": 1.38,
+      "score": 0.31,
       "legend": {
         "0": "Flee: ghosts are close and closing; give up pellets to survive.",
         "1": "Cautious: keep distance, take only safe pellets.",
@@ -25,18 +25,18 @@
         "4": "Reckless: powered up with ghosts nearby; actively chase them down."
       },
       "probabilities": {
-        "0": 0.08,
-        "1": 0.52,
-        "2": 0.34,
-        "3": 0.06,
-        "4": 0.0
+        "0": 0.7,
+        "1": 0.3,
+        "2": 0,
+        "3": 0,
+        "4": 0
       },
-      "confidence": 0.64
+      "confidence": 0.74
     }
   },
   "usage": {
-    "input_tokens": 318,
-    "output_tokens": 0,
-    "cost": 0.0000133
+    "input_tokens": 1041,
+    "output_tokens": 62,
+    "cost": 4.3722e-05
   }
 }

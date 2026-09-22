@@ -4,7 +4,10 @@ from fastapi.testclient import TestClient
 from app.config import Settings
 from app.main import app
 
-client = TestClient(app)
+# Entered once for the module: triggers the lifespan startup that sets
+# app.state.http_client, which the /jev-move route always reads.
+_client_ctx = TestClient(app)
+client = _client_ctx.__enter__()
 
 BODY = {
     "mazeId": "classic-28x31", "tick": 412, "position": {"x": 12, "y": 5}, "direction": "LEFT",
@@ -34,7 +37,9 @@ def test_malformed_body_is_422():
 
 
 def test_health():
-    assert client.get("/api/v1/health").json() == {"status": "ok", "mode": "stub"}
+    data = client.get("/api/v1/health").json()
+    assert data["status"] == "ok" and data["mode"] == "stub"
+    assert "model" in data and isinstance(data["keyConfigured"], bool)
 
 
 def test_cors_allows_vite_origin():

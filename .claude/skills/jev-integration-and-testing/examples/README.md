@@ -5,20 +5,21 @@ never hit the network.
 
 | File | Status |
 |---|---|
-| `junction-request.json` | SYNTHETIC — hand-built to schema v1 |
-| `junction-response.json` | SYNTHETIC — replace with a real capture in Phase 5 |
-| `malformed-response.json` | SYNTHETIC — exercises the degradation ladder |
+| `junction-request.json` | SYNTHETIC — hand-built to schema v1; the exact request sent for the real capture below |
+| `junction-response.json` | REAL — captured via `scripts/probe_jev.py` on 2026-09-22 against `~typesafe/jev-latest` |
+| `error-401.json` | REAL — captured via `scripts/probe_jev.py` with a deliberately invalid key |
+| `malformed-response.json` | SYNTHETIC — exercises the degradation ladder (illegal move, missing key, bad sum, out-of-range score); these failure shapes aren't producible from a real call on demand |
 
-**These are synthetic until a live call is captured.** They match the documented schema,
-but a fixture that was never produced by the real service can encode a wrong assumption
-and then defend it forever in the test suite. Phase 5 replaces the first two with real
-captures and resolves the UNCONFIRMED items in `../references/decisions-api.md`.
+**Phase 5 resolved the UNCONFIRMED items** in `../references/decisions-api.md`: the model
+slug resolves as `~typesafe/jev-latest`, `score` criteria as a JSON array is accepted as-is
+(no index-keyed fallback needed), and the 401 body is `{"error": {"message": ..., "code":
+401}}`. One documented assumption was wrong: `usage.output_tokens` was 62 in the real
+capture, not 0.
 
-To capture:
+To recapture (e.g. after a schema change):
 
 ```bash
-cd backend && JEV_MODE=live JEV_LOG_DECISIONS=true uvicorn app.main:app
-# play a round, then take a raw exchange from backend/logs/decisions.jsonl
+cd backend && ../scripts/probe_jev.py   # manual probe, not a test -- prints raw bodies
 ```
 
 Scrub nothing but the key — the state and answers are game data, not secrets.
