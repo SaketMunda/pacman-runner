@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export function ControlBar({ engineRef }) {
+export function ControlBar({ engineRef, toggleRef }) {
   const [status, setStatus] = useState('ready')
   const [controlMode, setControlModeState] = useState('human')
 
@@ -46,6 +46,7 @@ export function ControlBar({ engineRef }) {
       <label className="ml-auto flex items-center gap-2 text-sm text-text-dim">
         <span>Human</span>
         <button
+          ref={toggleRef}
           type="button"
           role="switch"
           aria-checked={controlMode === 'jev'}
