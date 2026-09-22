@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+:root {
+  --bg: #0a0a12;
+  --surface: #12121f;
+  --surface-2: #1b1b2e;
+  --border: #2a2a45;
+  --text: #e8e8f5;
+  --text-dim: #9a9ab8;
+
+  --maze-wall: #2540ff;
+  --pellet: #ffd9a0;
+  --power: #ffe66d;
+  --pac: #ffe600;
+
+  --jev: #00f0c8;
+  --jev-dim: #00806c;
+  --fallback: #ffb340;
+  --danger: #ff2e63;
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+
+  --color-maze-wall: var(--maze-wall);
+  --color-pellet: var(--pellet);
+  --color-power: var(--power);
+  --color-pac: var(--pac);
+
+  --color-jev: var(--jev);
+  --color-jev-dim: var(--jev-dim);
+  --color-fallback: var(--fallback);
+  --color-danger: var(--danger);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-decorative {
+    animation: none !important;
+    transition: none !important;
+  }
+}
