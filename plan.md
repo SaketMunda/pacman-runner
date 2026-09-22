@@ -171,7 +171,7 @@ Written before code so implementation follows them.
 21. `decisionScheduler.js` — prefetch on corridor entry, junctionId tagging, deadline, stale-reply discard.
 22. `jevClient.js` + `useJevDecisions` — fetch, abort, error surfacing.
 23. `JevPanel` bento cards — `ProbabilityBars`, `AggressionMeter`, `DecisionLog`, source badge.
-24. `ErrorBanner` + `Onboarding` — backend-down banner auto-switching to human control; one-sentence explainer.
+24. `ErrorBanner` + `Onboarding` — backend-down banner; Jev mode keeps running on the local fallback policy and the banner offers a switch to human control; one-sentence explainer.
 
 **Verify:** run both servers in stub mode; Jev-controlled Pac-Runner clears pellets, bars animate on each decision, no frame drops. Kill the backend mid-run → banner appears, game keeps running on fallback.
 

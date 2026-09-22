@@ -5,7 +5,8 @@ description: Conventions for the Jev Pac-Runner React frontend. Load when editin
 
 # Jev Pac-Runner — frontend
 
-React 18 + Vite + Tailwind, ES modules throughout. Dev server proxies `/api` to
+React + Vite + Tailwind (whatever versions `npm create vite` and Tailwind v4's
+`@tailwindcss/vite` plugin install; tokens are mapped with `@theme`), ES modules throughout. Dev server proxies `/api` to
 `localhost:8000` (see `vite.config.js`), so fetches are same-origin relative paths.
 
 ## The one structural rule
@@ -19,7 +20,7 @@ position into `useState` re-renders the tree 60 times a second and will drop fra
 first ghost — this is the mistake to avoid, not a micro-optimization.
 
 ```
-src/game/    pure logic, no imports from react   <- testable, deterministic
+src/game/    pure logic, no imports from react   <- vitest-tested, deterministic
 src/ai/      decision scheduling + fetch          <- no React either
 src/hooks/   the bridge: refs, rAF, subscriptions
 src/components/  render only
@@ -65,6 +66,11 @@ collapses or hides behind a tab.
   by probability descending and key by direction.
 - **`aggressionScore` is a float, not an int.** Jev returns a probability-weighted mean, so
   2.4 is normal and meaningful. Don't round it away — the fractional part is the signal.
+- **A prefetched snapshot is projected to the junction.** The backend derives legal moves
+  from `position`, so a request fired mid-corridor must send `position` = the junction tile
+  (`junctionId`), not Pac-Runner's current tile — otherwise the only legal moves are
+  forward/back and Jev answers the wrong question. Ghosts stay as observed now.
+  Re-check the returned move against `legalDirections(junction)` before applying it.
 - **Read the `source` field and show it.** `jev` / `stub` / `fallback` must be visually
   distinct. Never present a fallback move as a Jev decision.
 - **Animate probability bars with a transition on width**, not by re-mounting. Re-mounting
@@ -81,6 +87,7 @@ collapses or hides behind a tab.
 ```bash
 cd frontend && npm run dev     # with backend on :8000
 npm run lint
+npm test                       # vitest, covers src/game and src/ai only
 ```
 
 Manual checks that matter: keyboard playthrough clears pellets; ghosts behave distinctly;

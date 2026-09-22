@@ -5,7 +5,7 @@ theme would fight it.
 
 ## Tokens
 
-Defined once on `:root` in `src/index.css` and consumed through Tailwind's theme extension.
+Defined once on `:root` in `src/index.css` and consumed through Tailwind v4 `@theme` (e.g. `--color-surface: var(--surface)`).
 Never hard-code a hex in a component.
 
 ```css
