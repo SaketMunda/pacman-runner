@@ -61,6 +61,17 @@ async def test_auth_error_replays_real_401_body(respx_mock):
 
 
 @pytest.mark.respx(base_url="https://openrouter.ai")
+async def test_rbac_403_is_auth_error(respx_mock):
+    # Body as returned live on 2026-09-26 when the key lost Decisions API access.
+    body = {"error": {"message": "HTTP 403: RBAC: access denied", "code": 403}}
+    respx_mock.post(DECISIONS_PATH).mock(return_value=httpx.Response(403, json=body))
+    result = await _call()
+    assert isinstance(result, JevError)
+    assert result.kind == "auth_error"
+    assert result.status == 403
+
+
+@pytest.mark.respx(base_url="https://openrouter.ai")
 async def test_malformed_answers_is_bad_body(respx_mock):
     respx_mock.post(DECISIONS_PATH).mock(
         return_value=httpx.Response(200, json={"id": "gen-dec-x", "usage": {}})  # no 'answers'

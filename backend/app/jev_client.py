@@ -70,7 +70,9 @@ async def call_jev(
     latency_ms = elapsed()
     status = resp.status_code
 
-    if status in (401, 402):
+    # 403 included: OpenRouter answers "RBAC: access denied" when a key loses access to the
+    # alpha Decisions API (observed live 2026-09-26) -- an auth problem, not a bad request.
+    if status in (401, 402, 403):
         log.error("Jev auth error %s: %s", status, _safe_body(resp))
         return JevError("auth_error", f"HTTP {status}", status=status, latency_ms=latency_ms)
     if status >= 500:

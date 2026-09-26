@@ -9,7 +9,9 @@ const BACKEND_DOWN_STREAK_FOR_BANNER = 3
 const EMPTY_PANEL_STATE = {
   currentDecision: null,
   decisionLog: [],
-  stats: { requests: 0, hits: 0, hitRate: 0, medianLatencyMs: null, fallbacks: {} },
+  stats: { requests: 0, hits: 0, hitRate: 0, medianLatencyMs: null, fallbacks: {}, bySource: {} },
+  controlMode: 'human',
+  status: 'ready',
 }
 
 /**
@@ -24,6 +26,9 @@ export function useJevDecisions() {
 
   const [panelState, setPanelState] = useState(EMPTY_PANEL_STATE)
   const [backendDownStreak, setBackendDownStreak] = useState(0)
+  // Bumped each time a request succeeds after one or more backend-down
+  // fallbacks, so the health-driven mode indicator knows to re-fetch.
+  const [backendRecoveries, setBackendRecoveries] = useState(0)
 
   const decisionLogRef = useRef([])
   const lastPublishRef = useRef(0)
@@ -40,6 +45,8 @@ export function useJevDecisions() {
         currentDecision: engine.state.lastDecision,
         decisionLog: decisionLogRef.current,
         stats: scheduler.getStats(),
+        controlMode: engine.state.controlMode,
+        status: engine.state.status,
       })
     }
 
@@ -66,6 +73,7 @@ export function useJevDecisions() {
         if (decision.reason === 'backend-down') {
           streakRef.current += 1
         } else if (decision.source !== 'fallback') {
+          if (streakRef.current > 0) setBackendRecoveries((n) => n + 1)
           streakRef.current = 0
         }
         setBackendDownStreak(streakRef.current)
@@ -79,10 +87,11 @@ export function useJevDecisions() {
         return
       }
 
-      if (event.type === 'controlModeChanged') {
+      if (event.type === 'controlModeChanged' || event.type === 'statusChanged') {
         publish(true)
       }
     })
+    publish(true)
 
     return unsubscribe
   }, [engineRef, scheduler])
@@ -91,5 +100,6 @@ export function useJevDecisions() {
     engineRef,
     panelState,
     backendDown: backendDownStreak >= BACKEND_DOWN_STREAK_FOR_BANNER,
+    backendRecoveries,
   }
 }

@@ -5,7 +5,14 @@ import {
   eatPowerPellet,
 } from './collision.js'
 import { stubDecisionProvider } from './decisionProvider.js'
-import { createGhosts, createPacRunner, directionDelta, TICK_HZ, TICK_MS } from './entities.js'
+import {
+  createGhosts,
+  createPacRunner,
+  directionDelta,
+  speedScale,
+  TICK_HZ,
+  TICK_MS,
+} from './entities.js'
 import {
   chooseDirection,
   chooseFrightenedDirection,
@@ -54,13 +61,13 @@ function findUpcomingJunction(x, y, direction) {
 }
 
 export function createEngine({ decisionProvider = stubDecisionProvider } = {}) {
-  const pelletsGrid = collectPelletsGrid()
-
   const state = {
     tick: 0,
     pac: createPacRunner(),
     ghosts: createGhosts(),
-    pelletsGrid,
+    // Always read through state: reset() replaces this grid, and a captured
+    // reference would keep eating from the previous round's board.
+    pelletsGrid: collectPelletsGrid(),
     pelletsRemaining: countPellets(),
     powerTicksRemaining: 0,
     lives: 3,
@@ -122,12 +129,12 @@ export function createEngine({ decisionProvider = stubDecisionProvider } = {}) {
   }
 
   function tileTypeAt(x, y) {
-    const row = pelletsGrid[y]
+    const row = state.pelletsGrid[y]
     return row ? row[x] : undefined
   }
 
   function consumeTileAt(x, y) {
-    const row = pelletsGrid[y]
+    const row = state.pelletsGrid[y]
     if (!row) return
     const cell = row[x]
     if (cell === '.') {
@@ -166,7 +173,7 @@ export function createEngine({ decisionProvider = stubDecisionProvider } = {}) {
       return
     }
 
-    entity.progress += entity.speed
+    entity.progress += entity.speed * speedScale(state.controlMode)
     if (entity.progress >= 1) {
       entity.progress = 0
       entity.x = wrapX(entity.x + dx)
@@ -312,7 +319,8 @@ export function createEngine({ decisionProvider = stubDecisionProvider } = {}) {
       }
     }
 
-    const speed = ghost.mode === 'frightened' ? ghost.speed * 0.6 : ghost.speed
+    const base = ghost.speed * speedScale(state.controlMode)
+    const speed = ghost.mode === 'frightened' ? base * 0.6 : base
     const legalHere = legalDirections(ghost.x, ghost.y, { isGhost: true })
     if (legalHere.includes(ghost.direction)) {
       ghost.progress += speed

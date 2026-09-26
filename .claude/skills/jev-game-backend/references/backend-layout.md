@@ -43,10 +43,15 @@ backend/
   ],
   "powerTicksRemaining": 0,
   "pelletsRemaining": 173,
+  "eatenPellets": [[12, 15], [11, 14]],
   "lives": 3,
   "score": 710
 }
 ```
+
+`eatenPellets` lists every start-layout pellet tile that is gone, as `[x, y]` (defaults to
+`[]`). `features.py` subtracts it from `maze.pellets`; without it every pellet feature
+describes the starting board for the whole game.
 
 Response:
 

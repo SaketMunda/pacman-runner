@@ -10,6 +10,8 @@ def test_shape(junction):
     assert set(f) == {"heading", "powerTicks", "pelletsLeft", "lives", "options"}
     for opt in f["options"].values():
         assert set(opt) == {"pelletDistance", "pelletsWithin8", "deadEnd", "nearestGhost"}
+        if opt["nearestGhost"]:
+            assert set(opt["nearestGhost"]) == {"name", "distance", "mode", "closing"}
 
 
 def test_only_legal_directions_and_single_source(junction):
@@ -36,3 +38,30 @@ def test_no_grid_and_compact():
     text = json.dumps(extract(make_state(6, 5, ghosts=ghosts)), separators=(",", ":"))
     assert "grid" not in text and "#" not in text
     assert len(text) / 4 < 400  # ~4 chars per token
+
+
+def test_eaten_pellets_are_not_reported_as_present():
+    # (6, 20) sits on the column-6 corridor where live play livelocked: the static layout
+    # always reported a pellet one tile away, however long ago it had been eaten.
+    from app.maze import MAZE
+
+    start = make_state(6, 20, direction="DOWN")
+    before = extract(start)["options"]["DOWN"]
+    assert before["pelletDistance"] == 1
+
+    eaten = sorted(MAZE.pellets)  # everything gone
+    after = extract(make_state(6, 20, direction="DOWN", eaten_pellets=eaten))["options"]
+    assert all(o["pelletDistance"] is None and o["pelletsWithin8"] == 0 for o in after.values())
+
+    one_gone = extract(make_state(6, 20, direction="DOWN", eaten_pellets=[(6, 21)]))
+    assert one_gone["options"]["DOWN"]["pelletsWithin8"] == before["pelletsWithin8"] - 1
+
+
+def test_closing_follows_the_ghost_heading():
+    # blinky sits at (15, 5), three tiles right of the (12, 5) junction.
+    toward = extract(make_state(12, 5, ghosts=[{**ghost("blinky", 15, 5), "direction": "LEFT"}]))
+    away = extract(make_state(12, 5, ghosts=[{**ghost("blinky", 15, 5), "direction": "RIGHT"}]))
+    headless = extract(make_state(12, 5, ghosts=[{**ghost("blinky", 15, 5), "direction": None}]))
+    assert toward["options"]["RIGHT"]["nearestGhost"]["closing"] is True
+    assert away["options"]["RIGHT"]["nearestGhost"]["closing"] is False
+    assert headless["options"]["RIGHT"]["nearestGhost"]["closing"] is False

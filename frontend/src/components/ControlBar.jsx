@@ -1,5 +1,23 @@
 import { useEffect, useState } from 'react'
 
+const BUTTON_CLASS =
+  'rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm text-text hover:border-text-dim'
+
+const FINISHED = new Set(['won', 'gameover'])
+
+/** Label and action for the one primary button, by engine status. */
+function primaryAction(status) {
+  if (status === 'playing') return { label: 'Pause', run: (engine) => engine.pause() }
+  if (status === 'paused') return { label: 'Resume', run: (engine) => engine.start() }
+  if (FINISHED.has(status)) return { label: 'Play again', run: restartAndPlay }
+  return { label: 'Start', run: (engine) => engine.start() }
+}
+
+function restartAndPlay(engine) {
+  engine.reset()
+  engine.start()
+}
+
 export function ControlBar({ engineRef, toggleRef }) {
   const [status, setStatus] = useState('ready')
   const [controlMode, setControlModeState] = useState('human')
@@ -10,57 +28,59 @@ export function ControlBar({ engineRef, toggleRef }) {
     setControlModeState(engine.state.controlMode)
     return engine.subscribe((event) => {
       if (event.type === 'statusChanged') setStatus(event.status)
+      if (event.type === 'reset') setStatus(engine.state.status)
       if (event.type === 'controlModeChanged') setControlModeState(event.mode)
     })
   }, [engineRef])
 
   const engine = engineRef.current
+  const primary = primaryAction(status)
 
   function toggleControlMode() {
-    engine.setControlMode(controlMode === 'human' ? 'jev' : 'human')
+    const next = controlMode === 'human' ? 'jev' : 'human'
+    engine.setControlMode(next)
+    // The engine only ticks while playing, so Jev on a finished board would
+    // make no decisions and the panel would sit idle. Start a fresh round
+    // instead: flipping to Jev always results in Jev visibly playing.
+    if (next === 'jev' && FINISHED.has(engine.state.status)) restartAndPlay(engine)
   }
+
+  const isJev = controlMode === 'jev'
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
-      <button
-        type="button"
-        className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-jev"
-        onClick={() => engine.start()}
-      >
-        {status === 'ready' || status === 'paused' ? 'Start' : 'Playing'}
+      <button type="button" className={BUTTON_CLASS} onClick={() => primary.run(engine)}>
+        {primary.label}
       </button>
-      <button
-        type="button"
-        className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-jev"
-        onClick={() => engine.pause()}
-      >
-        Pause
-      </button>
-      <button
-        type="button"
-        className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-jev"
-        onClick={() => engine.reset()}
-      >
+      <button type="button" className={BUTTON_CLASS} onClick={() => engine.reset()}>
         Restart
       </button>
-      <label className="ml-auto flex items-center gap-2 text-sm text-text-dim">
-        <span>Human</span>
+      <div className="ml-auto flex items-center gap-2 text-sm">
+        <span className={isJev ? 'text-text-dim' : 'text-text'}>
+          Human
+        </span>
         <button
           ref={toggleRef}
           type="button"
           role="switch"
-          aria-checked={controlMode === 'jev'}
+          aria-checked={isJev}
+          aria-label="Jev controls Pac-Runner"
+          title={
+            FINISHED.has(status) && !isJev
+              ? 'Switching to Jev starts a new round'
+              : 'Toggle who steers Pac-Runner'
+          }
           onClick={toggleControlMode}
-          className="relative h-6 w-11 rounded-full border border-border bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-jev"
+          className="relative h-6 w-11 rounded-full border border-border bg-surface-2"
         >
           <span
-            className={`absolute top-0.5 h-4 w-4 rounded-full bg-jev transition-transform duration-200 ${
-              controlMode === 'jev' ? 'translate-x-5' : 'translate-x-0.5'
+            className={`absolute top-0.5 h-4 w-4 rounded-full transition-transform duration-200 ${
+              isJev ? 'translate-x-5 bg-jev' : 'translate-x-0.5 bg-text-dim'
             }`}
           />
         </button>
-        <span className="text-jev">Jev</span>
-      </label>
+        <span className={isJev ? 'text-jev' : 'text-text-dim'}>Jev</span>
+      </div>
     </div>
   )
 }

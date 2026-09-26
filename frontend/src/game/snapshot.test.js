@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { buildSnapshot } from './snapshot.js'
+import { maze } from './maze.js'
+import { buildSnapshot, eatenPellets } from './snapshot.js'
 
 function fixtureEngineState() {
   return {
@@ -30,6 +31,7 @@ describe('buildSnapshot', () => {
         'ghosts',
         'powerTicksRemaining',
         'pelletsRemaining',
+        'eatenPellets',
         'lives',
         'score',
       ].sort(),
@@ -57,5 +59,29 @@ describe('buildSnapshot', () => {
     expect(snapshot.pelletsRemaining).toBe(240)
     expect(snapshot.lives).toBe(3)
     expect(snapshot.score).toBe(0)
+  })
+})
+
+describe('eatenPellets', () => {
+  const freshGrid = () => maze.grid.map((row) => row.split(''))
+
+  it('is empty for an untouched board and when no grid is given', () => {
+    expect(eatenPellets(freshGrid())).toEqual([])
+    expect(eatenPellets(undefined)).toEqual([])
+  })
+
+  it('lists exactly the eaten pellet and power-pellet tiles as [x, y]', () => {
+    const grid = freshGrid()
+    const pellet = grid[1].indexOf('.')
+    const powerRow = grid.findIndex((row) => row.includes('o'))
+    const power = grid[powerRow].indexOf('o')
+    grid[1][pellet] = ' '
+    grid[powerRow][power] = ' '
+    expect(eatenPellets(grid)).toEqual(
+      [
+        [pellet, 1],
+        [power, powerRow],
+      ].sort((a, b) => a[1] - b[1]),
+    )
   })
 })

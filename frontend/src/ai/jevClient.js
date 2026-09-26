@@ -49,3 +49,19 @@ export async function fetchDecision(snapshot, { signal } = {}) {
 
   return data
 }
+
+/**
+ * GET /api/v1/health -> `{ mode, model, keyConfigured }`, or null when the
+ * backend is unreachable or answers with something unusable. Never throws.
+ */
+export async function fetchHealth({ signal } = {}) {
+  try {
+    const response = await fetch('/api/v1/health', { signal })
+    if (!response.ok) return null
+    const data = await response.json()
+    if (data?.mode !== 'stub' && data?.mode !== 'live') return null
+    return { mode: data.mode, model: data.model ?? null, keyConfigured: data.keyConfigured === true }
+  } catch {
+    return null
+  }
+}

@@ -42,7 +42,12 @@ def _rationale(feats: dict, move: str) -> str:
 
 
 def _fallback(
-    state: GameStateIn, maze: Maze, rung: int, legal_moves: list[str], jev_latency_ms: int | None
+    state: GameStateIn,
+    maze: Maze,
+    rung: int,
+    legal_moves: list[str],
+    jev_latency_ms: int | None,
+    features: dict | None = None,
 ) -> JevMoveOut:
     out = decide_stub(state, maze)
     if jev_latency_ms is not None:
@@ -58,6 +63,7 @@ def _fallback(
         confidence=out.confidence,
         latency_ms=out.latency_ms,
         schema_version=QUESTION_SCHEMA_VERSION,
+        features=features,
     )
     return out
 
@@ -67,17 +73,19 @@ async def decide(
 ) -> JevMoveOut:
     if settings.jev_mode == "stub":
         out = decide_stub(state, maze)
+        feats = extract(state, maze)
         log_decision(
             junction_id=state.junction_id,
             source=out.source,
             move=out.move,
             rung=1,
-            legal_moves=list(extract(state, maze)["options"]),
+            legal_moves=list(feats["options"]),
             probabilities=out.move_probabilities,
             aggression=out.aggression_score,
             confidence=out.confidence,
             latency_ms=out.latency_ms,
             schema_version=QUESTION_SCHEMA_VERSION,
+            features=feats,
         )
         return out
 
@@ -93,7 +101,9 @@ async def decide(
 
     if isinstance(result, JevError):
         log.warning("Jev call failed (%s): %s", result.kind, result.detail)
-        return _fallback(state, maze, _ERROR_RUNG[result.kind], legal_directions, result.latency_ms)
+        return _fallback(
+            state, maze, _ERROR_RUNG[result.kind], legal_directions, result.latency_ms, feats
+        )
 
     assert isinstance(result, JevSuccess)
     move_answer = result.answers.get("move")
@@ -104,16 +114,12 @@ async def decide(
     )
     if not move_ok:
         log.warning("Jev answer missing move choice: %s", move_answer)
-        return _fallback(
-            state, maze, rung=5, legal_moves=legal_directions, jev_latency_ms=result.latency_ms
-        )
+        return _fallback(state, maze, 5, legal_directions, result.latency_ms, feats)
 
     move = move_answer["choice"]
     if move not in legal_set:
         log.warning("Jev chose illegal move %s outside legal set %s", move, legal_set)
-        return _fallback(
-            state, maze, rung=6, legal_moves=legal_directions, jev_latency_ms=result.latency_ms
-        )
+        return _fallback(state, maze, 6, legal_directions, result.latency_ms, feats)
 
     probabilities = move_answer.get("probabilities")
     if not isinstance(probabilities, dict) or abs(sum(probabilities.values()) - 1.0) > 0.02:
@@ -154,5 +160,6 @@ async def decide(
         latency_ms=result.latency_ms,
         schema_version=QUESTION_SCHEMA_VERSION,
         cost=result.cost,
+        features=feats,
     )
     return out

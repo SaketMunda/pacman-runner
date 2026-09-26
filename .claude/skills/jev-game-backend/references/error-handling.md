@@ -12,7 +12,7 @@ Each rung falls to the next. `source` in the response records where it landed.
 | 1 | `JEV_MODE=stub` | skip the network entirely | `stub` | debug |
 | 2 | Jev answers, move is legal, distribution valid | use it | `jev` | info |
 | 3 | Timeout / connect error / 5xx from OpenRouter | stub policy | `stub` | warning |
-| 4 | 401 / 402 from OpenRouter | stub policy, and flag config | `stub` | error |
+| 4 | 401 / 402 / 403 from OpenRouter | stub policy, and flag config | `stub` | error |
 | 5 | Answer missing the `move` key, or wrong `type` | stub policy | `stub` | warning |
 | 6 | `move` not in the legal set for this junction | stub policy | `stub` | warning |
 | 7 | Probabilities absent or don't sum to ~1 (±0.02) | keep the move, null the distribution | `jev` | warning |

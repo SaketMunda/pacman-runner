@@ -9,6 +9,7 @@
   --text-dim: #9a9ab8;
 
   --maze-wall: #2540ff;
+  --maze-wall-power: #8a3cff; /* power mode: walls shift toward violet */
   --pellet: #ffd9a0;
   --power: #ffe66d;
   --pac: #ffe600;
@@ -16,6 +17,9 @@
   --jev: #00f0c8;
   --jev-dim: #00806c;
   --fallback: #ffb340;
+  /* stub: backend's local policy, not Jev -- a neutral grey so it never reads as
+     a dimmer Jev. --jev-dim failed contrast as badge text (3.2:1). */
+  --stub: #a9b4c8;
   --danger: #ff2e63;
 }
 
@@ -35,6 +39,7 @@
   --color-jev: var(--jev);
   --color-jev-dim: var(--jev-dim);
   --color-fallback: var(--fallback);
+  --color-stub: var(--stub);
   --color-danger: var(--danger);
 }
 
@@ -56,6 +61,25 @@ body {
   color-scheme: dark;
 }
 
+/* One focus treatment for every control, including ones added later. */
+:focus-visible {
+  outline: 2px solid var(--jev);
+  outline-offset: 2px;
+}
+
+.sr-only-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The decision pulse is driven from JS (element.animate) so it restarts
+   without re-mounting the card; JS checks the same media query. The class
+   below covers any CSS-only decorative motion. Bar and marker transitions are
+   deliberately NOT listed -- they carry data (ui-system.md). */
 @media (prefers-reduced-motion: reduce) {
   .motion-decorative {
     animation: none !important;

@@ -35,6 +35,9 @@ class GameStateIn(CamelModel):
     ghosts: list[GhostIn] = []
     power_ticks_remaining: int = 0
     pellets_remaining: int
+    # Tiles whose pellet (or power pellet) has been eaten, as [x, y]. Without this the
+    # backend only knows the starting layout and tells Jev every corridor is still full.
+    eaten_pellets: list[tuple[int, int]] = []
     lives: int
     score: int
 

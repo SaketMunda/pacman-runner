@@ -1,6 +1,15 @@
-import pytest
+import os
 
-from app.models import GameStateIn
+# Tests must never depend on the developer's backend/.env: a live JEV_MODE there made
+# test_api.py call OpenRouter for real, and every test decision was appended to
+# logs/decisions.jsonl. Env vars take precedence over .env in pydantic-settings, and this
+# runs before any test module imports app.main (which reads settings at import).
+os.environ["JEV_MODE"] = "stub"
+os.environ["JEV_LOG_DECISIONS"] = "false"
+
+import pytest  # noqa: E402
+
+from app.models import GameStateIn  # noqa: E402
 
 
 def make_state(x=12, y=5, direction="LEFT", ghosts=None, power=0, **kw) -> GameStateIn:

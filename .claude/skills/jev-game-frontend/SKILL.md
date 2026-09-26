@@ -70,7 +70,11 @@ collapses or hides behind a tab.
   from `position`, so a request fired mid-corridor must send `position` = the junction tile
   (`junctionId`), not Pac-Runner's current tile — otherwise the only legal moves are
   forward/back and Jev answers the wrong question. Ghosts stay as observed now.
+  `eatenPellets` is projected too: the corridor pellets Pac-Runner will eat on the way
+  count as eaten, or Jev is told the corridor it is leaving still has food one tile back.
   Re-check the returned move against `legalDirections(junction)` before applying it.
+- **Every pellet read goes through `state.pelletsGrid`.** `reset()` replaces that grid; a
+  captured reference keeps eating from the previous round's board (a Phase 6 bug).
 - **Read the `source` field and show it.** `jev` / `stub` / `fallback` must be visually
   distinct. Never present a fallback move as a Jev decision.
 - **Animate probability bars with a transition on width**, not by re-mounting. Re-mounting

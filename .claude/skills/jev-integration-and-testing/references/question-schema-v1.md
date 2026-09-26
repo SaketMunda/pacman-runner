@@ -69,25 +69,24 @@ change.
 
 ## Full request shape
 
+This is what `features.extract()` actually produces (Phase 6 corrected this section, which
+had drifted from the code). A complete real request/response pair is in
+`docs/jev-examples.md`.
+
 ```json
 {
   "model": "~typesafe/jev-latest",
   "state": {
-    "position": {"x": 12, "y": 14},
     "heading": "LEFT",
-    "livesRemaining": 3,
-    "pelletsRemaining": 173,
-    "powerTicksRemaining": 0,
+    "powerTicks": 0,
+    "pelletsLeft": 173,
+    "lives": 3,
     "options": {
       "LEFT": {"pelletDistance": 3, "pelletsWithin8": 11, "deadEnd": false,
                "nearestGhost": {"name": "blinky", "distance": 3, "mode": "chase", "closing": true}},
       "UP":   {"pelletDistance": 1, "pelletsWithin8": 6,  "deadEnd": false,
                "nearestGhost": {"name": "pinky", "distance": 9, "mode": "scatter", "closing": false}}
-    },
-    "ghosts": [
-      {"name": "blinky", "distance": 3, "mode": "chase", "bearing": "RIGHT"},
-      {"name": "pinky",  "distance": 9, "mode": "scatter", "bearing": "UP"}
-    ]
+    }
   },
   "questions": { "move": {...}, "aggression": {...} }
 }
@@ -96,5 +95,9 @@ change.
 `options` is keyed by the same legal directions as the `move` criteria — keep the two in
 sync from one source in `features.py`, never build them independently.
 
-All distances are **BFS through the maze**, tunnel-aware. `closing` compares this
-junction's distance to the previous snapshot's.
+All distances are **BFS through the maze**, tunnel-aware, and pellet features count only
+pellets not listed in the snapshot's `eatenPellets`. `closing` is stateless: true when the
+ghost's next step along its reported `direction` lowers its BFS distance to the junction
+(the backend keeps no per-game memory, so "compared with the previous snapshot" was never
+implementable; until Phase 6 the flag was simply never set and every rubric said "not
+closing").

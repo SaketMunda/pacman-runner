@@ -1,11 +1,16 @@
 """Append one JSONL line per decision to backend/logs/decisions.jsonl when
 JEV_LOG_DECISIONS=true. Never writes the key or the maze grid -- only decision-shaped data.
+
+`features` is the same compact dict sent to Jev as `state`, so a logged decision can be
+read against exactly what Jev saw.
 """
 
 import json
 import time
 from pathlib import Path
 from typing import Any
+
+from app.config import get_settings
 
 LOG_PATH = Path(__file__).resolve().parents[1] / "logs" / "decisions.jsonl"
 
@@ -23,7 +28,10 @@ def log_decision(
     latency_ms: int | None = None,
     schema_version: int | None = None,
     cost: float | None = None,
+    features: dict[str, Any] | None = None,
 ) -> None:
+    if not get_settings().jev_log_decisions:
+        return
     record: dict[str, Any] = {
         "ts": time.time(),
         "junctionId": junction_id,
@@ -37,6 +45,7 @@ def log_decision(
         "latencyMs": latency_ms,
         "schemaVersion": schema_version,
         "cost": cost,
+        "features": features,
     }
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with LOG_PATH.open("a") as f:

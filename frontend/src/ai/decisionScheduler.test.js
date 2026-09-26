@@ -79,6 +79,24 @@ describe('decisionScheduler', () => {
     expect(body.position).toEqual(JUNCTION)
   })
 
+  it('counts the corridor pellets it will eat before the junction as eaten', () => {
+    fetchMock.mockReturnValue(new Promise(() => {}))
+    const scheduler = createDecisionScheduler()
+
+    scheduler.onTick(fixtureState())
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    const onTheWay = [
+      [12, 21],
+      [12, 22],
+      [12, 23],
+    ].filter(([x, y]) => maze.grid[y][x] === '.' || maze.grid[y][x] === 'o')
+    expect(onTheWay.length).toBeGreaterThan(0)
+    for (const tile of onTheWay) expect(body.eatenPellets).toContainEqual(tile)
+    // nothing past the junction is touched
+    expect(body.eatenPellets).not.toContainEqual([12, 24])
+  })
+
   it('applies a resolved reply on arrival', async () => {
     const reply = { move: 'LEFT', source: 'jev', confidence: 0.8 }
     fetchMock.mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve(reply) })
